@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
 - gotk-components.yaml
 - gotk-sync.yaml
-- ../nodejs-app-helmrelease.yaml
-- ../helm-repo-gitrepository.yaml
+- nodejs-app-helmrelease.yaml
+- helm-repo-gitrepository.yaml
