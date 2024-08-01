@@ -1,23 +1,26 @@
 pipeline {
     agent any
-    
+    environment {
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+        IMAGE_NAME = "akshay2001a/nodejs-app"
+    }
     stages {
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building...'
-                // Add your build commands here
+                script {
+                    def imageTag = "${env.BUILD_NUMBER}"
+                    docker.build("${env.IMAGE_NAME}:${imageTag}")
+                }
             }
         }
-        stage('Test') {
+        stage('Push Docker Image') {
             steps {
-                echo 'Testing...'
-                // Add your test commands here
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying...'
-                // Add your deployment commands here
+                script {
+                    docker.withRegistry('', env.DOCKER_CREDENTIALS_ID) {
+                        def imageTag = "${env.BUILD_NUMBER}"
+                        docker.image("${env.IMAGE_NAME}:${imageTag}").push()
+                    }
+                }
             }
         }
     }
