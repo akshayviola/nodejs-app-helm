@@ -9,7 +9,8 @@ pipeline {
             steps {
                 script {
                     def imageTag = "${env.BUILD_NUMBER}"
-                    docker.build("${env.IMAGE_NAME}:${imageTag}")
+                    // Specify the Dockerfile location and build context
+                    docker.build("${env.IMAGE_NAME}:${imageTag}", '-f app/Dockerfile .')
                 }
             }
         }
