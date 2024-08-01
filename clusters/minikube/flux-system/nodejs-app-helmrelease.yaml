@@ -7,7 +7,7 @@ spec:
   releaseName: nodejs-app
   chart:
     spec:
-      chart: ./nodejs-app
+      chart: .
       sourceRef:
         kind: GitRepository
         name: helm-repo
