@@ -17,6 +17,6 @@ spec:
   values:
     replicaCount: 1
     image:
-      repository: localhost:5000/node-app
+      repository: akshay2001a/nodejs-app
       pullPolicy: IfNotPresent
       tag: "latest"
