@@ -46,8 +46,9 @@ pipeline {
                         sh """
                         git config user.name "akshayviola"
                         git config user.email "akshaysunil201@gmail.com"
+                        git checkout ${GIT_BRANCH} || git checkout -b ${GIT_BRANCH}  // Checkout the branch
                         git add ${HELM_CHART_PATH}/values.yaml
-                        git commit -m "Update image tag to ${BUILD_NUMBER}"
+                        git commit -m "Update image tag to ${BUILD_NUMBER}" || echo "No changes to commit"
                         git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GIT_REPO} ${GIT_BRANCH}
                         """
                     }
