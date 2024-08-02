@@ -78,12 +78,16 @@ pipeline {
     }
     post {
         failure {
-            echo "Pipeline failed"
-            currentBuild.result = 'FAILURE'
+            script {
+                echo "Pipeline failed"
+                currentBuild.result = 'FAILURE'
+            }
         }
         success {
-            echo "Pipeline succeeded"
-            currentBuild.result = 'SUCCESS'
+            script {
+                echo "Pipeline succeeded"
+                currentBuild.result = 'SUCCESS'
+            }
         }
         always {
             echo "Cleaning up..."
