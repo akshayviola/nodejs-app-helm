@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nodejs-app
+  namespace: flux-system
+spec:
+  releaseName: nodejs-app
+  chart:
+    spec:
+      chart: .
+      sourceRef:
+        kind: HelmRepository
+        name: nodejs-app-helm
+      version: v3.11.3 # specify the chart version
+  interval: 5m
+  values:
+    # Add your values here
