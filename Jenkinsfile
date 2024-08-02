@@ -42,7 +42,7 @@ pipeline {
         stage('Verify Changes') {
             steps {
                 script {
-                    sh 'cat ${HELM_CHART_PATH}/values.yaml' // Print the file contents for verification
+                    sh "cat ${HELM_CHART_PATH}/values.yaml" // Print the file contents for verification
                 }
             }
         }
@@ -57,7 +57,7 @@ pipeline {
                         git pull origin ${GIT_BRANCH} // Fetch and merge changes from remote
                         git add ${HELM_CHART_PATH}/values.yaml
                         git commit -m "Update image tag to ${BUILD_NUMBER}" || echo "No changes to commit"
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GIT_REPO.replace('https://', '')} ${GIT_BRANCH}
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm.git ${GIT_BRANCH}
                         """
                     }
                 }
