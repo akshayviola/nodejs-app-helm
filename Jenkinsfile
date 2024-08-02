@@ -13,6 +13,7 @@ pipeline {
             steps {
                 script {
                     def imageTag = "${env.BUILD_NUMBER}"
+                    echo "Building Docker image ${env.IMAGE_NAME}:${imageTag}"
                     docker.build("${env.IMAGE_NAME}:${imageTag}", "app")
                 }
             }
@@ -20,8 +21,9 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
+                    def imageTag = "${env.BUILD_NUMBER}"
+                    echo "Pushing Docker image ${env.IMAGE_NAME}:${imageTag} to Docker Hub"
                     docker.withRegistry('', env.DOCKER_CREDENTIALS_ID) {
-                        def imageTag = "${env.BUILD_NUMBER}"
                         docker.image("${env.IMAGE_NAME}:${imageTag}").push()
                     }
                 }
@@ -31,8 +33,7 @@ pipeline {
             steps {
                 script {
                     def imageTag = "${env.BUILD_NUMBER}"
-                    
-                    // Ensure the correct path to values.yaml
+                    echo "Updating Helm chart with image tag ${imageTag}"
                     sh """
                     sed -i 's|image: .*|image: ${IMAGE_NAME}:${imageTag}|' ${HELM_CHART_PATH}/values.yaml
                     """
@@ -42,6 +43,7 @@ pipeline {
         stage('Verify Changes') {
             steps {
                 script {
+                    echo "Verifying Helm chart updates"
                     sh "cat ${HELM_CHART_PATH}/values.yaml" // Print the file contents for verification
                 }
             }
@@ -50,14 +52,15 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        echo "Configuring Git and pushing changes"
                         sh """
                         git config user.name "akshayviola"
                         git config user.email "akshaysunil201@gmail.com"
                         git checkout ${GIT_BRANCH} || git checkout -b ${GIT_BRANCH} // Checkout the branch
-                        git pull origin ${GIT_BRANCH} # Fetch and merge changes from remote
+                        git pull origin ${GIT_BRANCH} || exit 1 # Fetch and merge changes from remote
                         git add ${HELM_CHART_PATH}/values.yaml
                         git commit -m "Update image tag to ${BUILD_NUMBER}" || echo "No changes to commit"
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm.git ${GIT_BRANCH}
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/akshayviola/nodejs-app-helm.git ${GIT_BRANCH} || exit 1
                         """
                     }
                 }
@@ -66,11 +69,25 @@ pipeline {
         stage('Apply Helm Release') {
             steps {
                 script {
-                    // Apply the HelmRelease configuration using FluxCD
-                    sh 'flux reconcile source git helm-repo'
-                    sh 'flux reconcile helmrelease nodejs-app'
+                    echo "Applying Helm release"
+                    sh 'flux reconcile source git helm-repo || exit 1'
+                    sh 'flux reconcile helmrelease nodejs-app || exit 1'
                 }
             }
+        }
+    }
+    post {
+        failure {
+            echo "Pipeline failed"
+            currentBuild.result = 'FAILURE'
+        }
+        success {
+            echo "Pipeline succeeded"
+            currentBuild.result = 'SUCCESS'
+        }
+        always {
+            echo "Cleaning up..."
+            // Perform any cleanup if necessary
         }
     }
 }
