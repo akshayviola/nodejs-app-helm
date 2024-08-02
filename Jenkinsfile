@@ -39,6 +39,13 @@ pipeline {
                 }
             }
         }
+        stage('Verify Changes') {
+            steps {
+                script {
+                    sh 'cat ${HELM_CHART_PATH}/values.yaml' // Print the file contents for verification
+                }
+            }
+        }
         stage('Commit Changes') {
             steps {
                 script {
