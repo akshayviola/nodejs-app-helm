@@ -6,6 +6,7 @@ pipeline {
         IMAGE_NAME = "akshay2001a/nodejs-app"
         GIT_REPO = 'https://github.com/akshayviola/nodejs-app-helm.git'
         GIT_BRANCH = 'main'
+        HELM_CHART_PATH = '.' // Set this to the path of your Helm chart in the Git repo
     }
     stages {
         stage('Build Docker Image') {
@@ -30,10 +31,10 @@ pipeline {
             steps {
                 script {
                     def imageTag = "${env.BUILD_NUMBER}"
-                    def helmChartPath = '.' // Set this to the path of your Helm chart in the Git repo
                     
+                    // Ensure the correct path to values.yaml
                     sh """
-                    sed -i 's|image: .*|image: ${IMAGE_NAME}:${imageTag}|' ${helmChartPath}/values.yaml
+                    sed -i 's|image: .*|image: ${IMAGE_NAME}:${imageTag}|' ${HELM_CHART_PATH}/values.yaml
                     """
                 }
             }
@@ -45,7 +46,7 @@ pipeline {
                         sh """
                         git config user.name "akshayviola"
                         git config user.email "akshaysunil201@gmail.com"
-                        git add ${helmChartPath}/values.yaml
+                        git add ${HELM_CHART_PATH}/values.yaml
                         git commit -m "Update image tag to ${BUILD_NUMBER}"
                         git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GIT_REPO} ${GIT_BRANCH}
                         """
